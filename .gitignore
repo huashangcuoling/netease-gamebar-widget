@@ -1,0 +1,16 @@
+# Build output
+bin/
+obj/
+AppPackages/
+build/
+.vs/
+
+# Certificates / private keys
+*.pfx
+*.cer
+
+# Logs and local test captures
+*.log
+*.dmp
+*.user
+*.suo
