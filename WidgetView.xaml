@@ -5,158 +5,128 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:NeteaseGameBarWidget"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Width="377"
-    Height="65"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    AutomationProperties.Name="网易云迷你播放器">
 
-    <UserControl.Resources>
-        <AcrylicBrush
-            x:Key="CardAcrylicBrush"
-            BackgroundSource="HostBackdrop"
-            FallbackColor="#F0141414"
-            TintColor="#141414"
-            TintOpacity="0.52" />
+    <Grid>
 
-        <!-- Keep the button surface transparent; only the glyph color changes. -->
-        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent" />
-        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent" />
-        <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent" />
-        <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="Transparent" />
-        <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="Transparent" />
-        <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="Transparent" />
-        <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="#FF8FD8FF" />
-        <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#FFFFFFFF" />
-        <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="#66FFFFFF" />
-
-        <Style x:Key="TransportButtonStyle" TargetType="Button">
-            <Setter Property="Width" Value="30" />
-            <Setter Property="Height" Value="30" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Foreground" Value="#F2FFFFFF" />
-            <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-            <Setter Property="FontSize" Value="15" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="UseSystemFocusVisuals" Value="False" />
-        </Style>
-    </UserControl.Resources>
-
-    <Grid x:Name="Root">
-        <!-- The acrylic surface. Game Bar composites this over the desktop. -->
+        <!-- The single surface. Nothing else in the tree paints a background. -->
         <Border
-            x:Name="Card"
-            Background="{StaticResource CardAcrylicBrush}"
-            BorderBrush="#26FFFFFF"
+            Background="{ThemeResource CardSurfaceBrush}"
+            BorderBrush="{ThemeResource CardStrokeBrush}"
             BorderThickness="1"
             CornerRadius="10" />
 
-        <!-- Very subtle top highlight, so the card does not look flat. -->
         <Border
-            CornerRadius="10"
-            IsHitTestVisible="False">
+            IsHitTestVisible="False"
+            CornerRadius="10">
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                    <GradientStop Color="#18FFFFFF" Offset="0" />
-                    <GradientStop Color="#00FFFFFF" Offset="0.55" />
+                    <GradientStop Offset="0" Color="{ThemeResource CardHighlightColor}" />
+                    <GradientStop Offset="0.5" Color="Transparent" />
                 </LinearGradientBrush>
             </Border.Background>
         </Border>
 
-        <Grid Margin="10,7,10,9">
+        <Grid x:Name="Layout" Margin="10,7,10,9">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="46" />
-                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
+            <!-- Cover, sized to the strip height. -->
             <Grid
+                x:Name="CoverHost"
                 Grid.Column="0"
-                Width="46"
-                Height="46"
+                Width="36"
+                Height="36"
+                RenderTransformOrigin="0.5,0.5"
                 VerticalAlignment="Center">
+                <Grid.RenderTransform>
+                    <CompositeTransform x:Name="CoverTransform" />
+                </Grid.RenderTransform>
+
                 <Border
                     x:Name="ArtworkPlaceholder"
-                    CornerRadius="5">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#FF3B6FA8" Offset="0" />
-                            <GradientStop Color="#FF202936" Offset="1" />
-                        </LinearGradientBrush>
-                    </Border.Background>
+                    Background="{ThemeResource PlaceholderBrush}"
+                    CornerRadius="8">
                     <FontIcon
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
                         FontFamily="Segoe Fluent Icons"
-                        FontSize="19"
-                        Foreground="#D9FFFFFF"
-                        Glyph="&#xE8D6;" />
+                        FontSize="18"
+                        Foreground="{ThemeResource TextTertiaryBrush}"
+                        Glyph="&#xE8D6;"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" />
                 </Border>
 
                 <Border
                     x:Name="AlbumArtBorder"
-                    CornerRadius="5"
+                    CornerRadius="8"
+                    Opacity="0"
                     Visibility="Collapsed">
                     <Border.Background>
-                        <ImageBrush
-                            x:Name="AlbumArtBrush"
-                            Stretch="UniformToFill" />
+                        <ImageBrush x:Name="AlbumArtBrush" Stretch="UniformToFill" />
                     </Border.Background>
                 </Border>
+
+                <Border
+                    BorderBrush="{ThemeResource ArtworkStrokeBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    IsHitTestVisible="False" />
             </Grid>
 
+            <!-- Title, then artist/album, then the playhead. All fixed sizes. -->
             <StackPanel
-                Grid.Column="2"
-                Margin="0,0,6,0"
+                x:Name="TextColumn"
+                Grid.Column="1"
+                Margin="12,0,12,0"
                 VerticalAlignment="Center">
+                <StackPanel.RenderTransform>
+                    <CompositeTransform x:Name="TextTransform" />
+                </StackPanel.RenderTransform>
+
                 <TextBlock
                     x:Name="TitleText"
-                    FontFamily="Segoe UI"
-                    FontSize="14"
-                    FontWeight="SemiBold"
-                    Foreground="#FFFFFFFF"
-                    MaxLines="1"
-                    Text="网易云音乐"
-                    TextTrimming="CharacterEllipsis"
-                    TextWrapping="NoWrap" />
+                    Style="{StaticResource TitleTextStyle}"
+                    Text="网易云音乐" />
                 <TextBlock
-                    x:Name="ArtistText"
-                    Margin="0,2,0,0"
-                    FontFamily="Segoe UI"
-                    FontSize="11"
-                    Foreground="#B3FFFFFF"
-                    MaxLines="1"
-                    Text="正在连接 SMTC…"
-                    TextTrimming="CharacterEllipsis"
-                    TextWrapping="NoWrap" />
+                    x:Name="SubtitleText"
+                    Margin="0,1,0,0"
+                    Style="{StaticResource SecondaryTextStyle}"
+                    Text="正在连接 SMTC…" />
+
             </StackPanel>
 
             <StackPanel
-                Grid.Column="3"
-                VerticalAlignment="Center"
-                Orientation="Horizontal">
+                Grid.Column="2"
+                Orientation="Horizontal"
+                VerticalAlignment="Center">
                 <Button
                     x:Name="PreviousButton"
                     AutomationProperties.Name="上一首"
                     Click="PreviousButton_Click"
                     Content="&#xE892;"
                     IsEnabled="False"
-                    PointerEntered="TransportButton_PointerEntered"
-                    PointerExited="TransportButton_PointerExited"
+                    PointerCanceled="TransportButton_PointerCanceled"
+                    PointerCaptureLost="TransportButton_PointerCanceled"
+                    PointerPressed="TransportButton_PointerPressed"
+                    PointerReleased="TransportButton_PointerReleased"
                     Style="{StaticResource TransportButtonStyle}" />
                 <Button
                     x:Name="PlayPauseButton"
-                    Width="34"
-                    Height="34"
+                    Width="30"
+                    Height="30"
                     AutomationProperties.Name="播放或暂停"
                     Click="PlayPauseButton_Click"
                     Content="&#xE768;"
                     FontSize="16"
                     IsEnabled="False"
-                    PointerEntered="TransportButton_PointerEntered"
-                    PointerExited="TransportButton_PointerExited"
+                    PointerCanceled="TransportButton_PointerCanceled"
+                    PointerCaptureLost="TransportButton_PointerCanceled"
+                    PointerPressed="TransportButton_PointerPressed"
+                    PointerReleased="TransportButton_PointerReleased"
                     Style="{StaticResource TransportButtonStyle}" />
                 <Button
                     x:Name="NextButton"
@@ -164,27 +134,12 @@
                     Click="NextButton_Click"
                     Content="&#xE893;"
                     IsEnabled="False"
-                    PointerEntered="TransportButton_PointerEntered"
-                    PointerExited="TransportButton_PointerExited"
+                    PointerCanceled="TransportButton_PointerCanceled"
+                    PointerCaptureLost="TransportButton_PointerCanceled"
+                    PointerPressed="TransportButton_PointerPressed"
+                    PointerReleased="TransportButton_PointerReleased"
                     Style="{StaticResource TransportButtonStyle}" />
             </StackPanel>
         </Grid>
-
-        <Border
-            x:Name="ProgressTrack"
-            Height="2"
-            Margin="12,0,12,6"
-            VerticalAlignment="Bottom"
-            Background="#26FFFFFF"
-            CornerRadius="1"
-            Visibility="Collapsed">
-            <Rectangle
-                x:Name="ProgressFill"
-                Width="0"
-                HorizontalAlignment="Left"
-                Fill="#CCFFFFFF"
-                RadiusX="1"
-                RadiusY="1" />
-        </Border>
     </Grid>
 </UserControl>

@@ -45,7 +45,11 @@
     <PlatformTarget>x64</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
-    <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
+    <!-- Keep .NET Native off: the toolchain that ships with the IDE requires
+         Microsoft.NET.Native.Framework/Runtime 2.3 build 60521, which only arrives
+         through the Store. The CoreCLR flavour installs by plain sideloading, and
+         the framework packages it needs ship in the release folder. -->
+    <UseDotNetNativeToolchain>false</UseDotNetNativeToolchain>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM64'">
     <DebugSymbols>true</DebugSymbols>
@@ -87,6 +91,8 @@
       <DependentUpon>WidgetView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\SmtcSnapshot.cs" />
+    <Compile Include="Services\Motion.cs" />
+    <Compile Include="Services\WidgetSettings.cs" />
     <Compile Include="Services\SmtcService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -109,6 +115,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="WidgetView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\WidgetTheme.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

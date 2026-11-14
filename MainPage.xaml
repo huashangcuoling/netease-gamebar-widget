@@ -21,7 +21,10 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             Spacing="18">
-            <local:WidgetView HorizontalAlignment="Center" />
+            <local:WidgetView
+                Width="520"
+                Height="48"
+                HorizontalAlignment="Center" />
             <TextBlock
                 HorizontalAlignment="Center"
                 FontSize="12"

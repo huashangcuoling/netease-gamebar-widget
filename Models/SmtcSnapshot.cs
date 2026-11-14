@@ -1,10 +1,10 @@
-using System;
 using Windows.UI.Xaml.Media.Imaging;
 
 namespace NeteaseGameBarWidget.Models
 {
     /// <summary>
-    /// Immutable-ish state passed from the SMTC service to the widget UI.
+    /// What the widget needs from the current SMTC session: who is playing, what
+    /// they are playing, what the transport allows, and the artwork.
     /// </summary>
     public sealed class SmtcSnapshot
     {
@@ -16,8 +16,6 @@ namespace NeteaseGameBarWidget.Models
 
         public string Album { get; set; }
 
-        public string SourceApp { get; set; }
-
         public bool IsPlaying { get; set; }
 
         public bool CanPlay { get; set; }
@@ -28,10 +26,6 @@ namespace NeteaseGameBarWidget.Models
 
         public bool CanPrevious { get; set; }
 
-        public TimeSpan Position { get; set; }
-
-        public TimeSpan Duration { get; set; }
-
         public BitmapImage Artwork { get; set; }
 
         public static SmtcSnapshot Empty()
@@ -41,10 +35,7 @@ namespace NeteaseGameBarWidget.Models
                 HasSession = false,
                 Title = "网易云音乐",
                 Artist = "未检测到播放",
-                Album = string.Empty,
-                SourceApp = string.Empty,
-                Position = TimeSpan.Zero,
-                Duration = TimeSpan.Zero
+                Album = string.Empty
             };
         }
     }

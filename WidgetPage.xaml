@@ -11,7 +11,7 @@
 
     <Grid Background="Transparent">
         <local:WidgetView
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center" />
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch" />
     </Grid>
 </Page>

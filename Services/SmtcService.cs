@@ -139,13 +139,6 @@ namespace NeteaseGameBarWidget.Services
             QueueRefresh();
         }
 
-        private void OnTimelinePropertiesChanged(
-            GlobalSystemMediaTransportControlsSession sender,
-            TimelinePropertiesChangedEventArgs args)
-        {
-            QueueRefresh();
-        }
-
         private void QueueRefresh()
         {
             if (_disposed)
@@ -186,7 +179,6 @@ namespace NeteaseGameBarWidget.Services
             {
                 _session.MediaPropertiesChanged += OnMediaPropertiesChanged;
                 _session.PlaybackInfoChanged += OnPlaybackInfoChanged;
-                _session.TimelinePropertiesChanged += OnTimelinePropertiesChanged;
             }
         }
 
@@ -201,7 +193,6 @@ namespace NeteaseGameBarWidget.Services
             {
                 _session.MediaPropertiesChanged -= OnMediaPropertiesChanged;
                 _session.PlaybackInfoChanged -= OnPlaybackInfoChanged;
-                _session.TimelinePropertiesChanged -= OnTimelinePropertiesChanged;
             }
             catch
             {
@@ -298,7 +289,6 @@ namespace NeteaseGameBarWidget.Services
 
                 GlobalSystemMediaTransportControlsSessionMediaProperties properties = null;
                 GlobalSystemMediaTransportControlsSessionPlaybackInfo playback = null;
-                GlobalSystemMediaTransportControlsSessionTimelineProperties timeline = null;
 
                 try
                 {
@@ -311,14 +301,6 @@ namespace NeteaseGameBarWidget.Services
                 try
                 {
                     playback = session.GetPlaybackInfo();
-                }
-                catch
-                {
-                }
-
-                try
-                {
-                    timeline = session.GetTimelineProperties();
                 }
                 catch
                 {
@@ -341,22 +323,6 @@ namespace NeteaseGameBarWidget.Services
                     _artwork = await LoadArtworkAsync(properties.Thumbnail);
                 }
 
-                var start = timeline != null ? timeline.StartTime : TimeSpan.Zero;
-                var end = timeline != null ? timeline.EndTime : TimeSpan.Zero;
-                var position = timeline != null ? timeline.Position : TimeSpan.Zero;
-                var duration = end > start ? end - start : TimeSpan.Zero;
-                var elapsed = position > start ? position - start : TimeSpan.Zero;
-
-                if (elapsed < TimeSpan.Zero)
-                {
-                    elapsed = TimeSpan.Zero;
-                }
-
-                if (duration > TimeSpan.Zero && elapsed > duration)
-                {
-                    elapsed = duration;
-                }
-
                 var controls = playback != null ? playback.Controls : null;
 
                 var snapshot = new SmtcSnapshot
@@ -365,15 +331,12 @@ namespace NeteaseGameBarWidget.Services
                     Title = string.IsNullOrWhiteSpace(properties.Title) ? "未知歌曲" : properties.Title,
                     Artist = string.IsNullOrWhiteSpace(properties.Artist) ? "未知歌手" : properties.Artist,
                     Album = properties.AlbumTitle ?? string.Empty,
-                    SourceApp = session.SourceAppUserModelId ?? string.Empty,
                     IsPlaying = playback != null && playback.PlaybackStatus ==
                         GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing,
                     CanPlay = controls != null && controls.IsPlayEnabled,
                     CanPause = controls != null && controls.IsPauseEnabled,
                     CanNext = controls != null && controls.IsNextEnabled,
                     CanPrevious = controls != null && controls.IsPreviousEnabled,
-                    Position = elapsed,
-                    Duration = duration,
                     Artwork = _artwork
                 };
 

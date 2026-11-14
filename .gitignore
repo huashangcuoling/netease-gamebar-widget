@@ -3,6 +3,7 @@ bin/
 obj/
 AppPackages/
 build/
+dist/
 .vs/
 
 # Certificates / private keys
